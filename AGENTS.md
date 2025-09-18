@@ -77,12 +77,9 @@
    - Enforce the single-hero cap wherever heroes leave or enter play by checking the flag in `server/processors/HeroPoolProcessor.cpp:165`, `server/CGameHandler.cpp:2503`, and `lib/mapObjects/CGHeroInstance.cpp:565` before allowing recruitment, garrison swaps, or similar flows.
    - Lock the lobby to one human by short-circuiting `OptionsTab::onSetPlayerClicked` (`client/lobby/OptionsTab.cpp:1154`), tightening `CVCMIServer::setPlayer` (`server/CVCMIServer.cpp:599`), and folding extra `playerInfos` to AI inside `updateStartInfoOnMapChange` (`server/CVCMIServer.cpp:487`) when Step mode is active.
    - Hide the economy layer when the flag is set: filter out marketplace/resource slots while building the hall grid in `client/windows/CCastleInterface.cpp:1738`, skip drawing the adventure-map resource bar in `client/adventureMap/CResDataBar.cpp:35`, and drop unused buildings via faction overrides under `Mods/step-prototype/Content/config/factions/`.
+   - Convert turn/day flow into an endless turn: guard the daily start/end-turn cycle in `server/CGameHandler.cpp` with `stepModeEnabled` so the single player never auto-ends; move daily/weekly resource processing into a real-time scheduler in `server/processors/NewTurnProcessor.cpp`; and treat network turn notifications as no-ops on the client (`client/GameInstance.cpp`, `client/GameEngine.cpp`) while the flag is active.
 2. Add a desktop debug provider that increments steps via hotkey or timer for development.
 3. Build `StepMovementController` that consumes steps, advances tiles, and handles path cancelation.
 4. Create HUD for step counter.
 5. Implement the iOS step provider with `CMPedometer`, exposing `stepsUpdated(totalSteps)` to Qt.
 6. Tie day advancement to real time by ending and restarting the player turn on schedule.
-
-
-
-
