@@ -72,8 +72,17 @@
 
 ## MVP Plan for agents
 1. Lock gameplay to one hero, disable AI players, and hide economy through a mod.
+   - Create `Mods/step-prototype/mod.json` and populate overrides under `Mods/step-prototype/Content/config/` so `gameConfig.json` sets `settings.heroes.perPlayerOnMapCap = 1`, `settings.heroes.perPlayerTotalCap = 1`, and introduces a boolean `stepModeEnabled` that core code can read.
+   - Register the new flag in settings plumbing: add `STEP_MODE_ENABLED` to `EGameSettings` (`lib/IGameSettings.h:55`), map it in `lib/GameSettings.cpp:78` and default it in the constructor, and extend the schema at `config/schemas/gameSettings.json:41` so mods validate.
+   - Enforce the single-hero cap wherever heroes leave or enter play by checking the flag in `server/processors/HeroPoolProcessor.cpp:165`, `server/CGameHandler.cpp:2503`, and `lib/mapObjects/CGHeroInstance.cpp:565` before allowing recruitment, garrison swaps, or similar flows.
+   - Lock the lobby to one human by short-circuiting `OptionsTab::onSetPlayerClicked` (`client/lobby/OptionsTab.cpp:1154`), tightening `CVCMIServer::setPlayer` (`server/CVCMIServer.cpp:599`), and folding extra `playerInfos` to AI inside `updateStartInfoOnMapChange` (`server/CVCMIServer.cpp:487`) when Step mode is active.
+   - Hide the economy layer when the flag is set: filter out marketplace/resource slots while building the hall grid in `client/windows/CCastleInterface.cpp:1738`, skip drawing the adventure-map resource bar in `client/adventureMap/CResDataBar.cpp:35`, and drop unused buildings via faction overrides under `Mods/step-prototype/Content/config/factions/`.
 2. Add a desktop debug provider that increments steps via hotkey or timer for development.
 3. Build `StepMovementController` that consumes steps, advances tiles, and handles path cancelation.
 4. Create HUD for step counter.
 5. Implement the iOS step provider with `CMPedometer`, exposing `stepsUpdated(totalSteps)` to Qt.
 6. Tie day advancement to real time by ending and restarting the player turn on schedule.
+
+
+
+
