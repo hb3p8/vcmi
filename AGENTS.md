@@ -21,6 +21,13 @@
 - Place native code in `ios/`, expose a Qt-facing class in `vcmiqt/`, and emit a signal with cumulative steps.
 - Update `Info.plist` with the motion usage description; add a debug mock for non-iOS builds.
 
+### Qt helper layer (vcmiqt on iOS)
+- `vcmiqt` is the shared Qt utility library that bridges VCMI core data to Qt types (JSON, paths, dialogs) and links against QtCore/QtWidgets (`vcmiqt/CMakeLists.txt:1`).
+- iOS builds force a single-app bundle and link the SDL client with the Qt launcher, so `vcmiqt` ships inside the mobile binary (`CMakeLists.txt:83`, `clientapp/CMakeLists.txt:38`).
+- The Qt launcher consumes `vcmiqt` helpers and layers Objective-C++ shims for platform services like directory pickers and orientation handling (`launcher/CMakeLists.txt:1`, `launcher/prepare_ios.mm:1`, `ios/iOS_utils.mm:1`).
+- Message boxes and similar Qt affordances already include iOS-safe async wrappers in `vcmiqt`; mirror that approach for any new dialogs or prompts (`vcmiqt/MessageBox.h:18`).
+- Route pedometer updates through Qt signals/slots here and forward them to the SDL client so gameplay logic continues to live in `client/` and `server/`.
+
 ### Client controller
 - Implement `StepMovementController` in the Qt client to track steps and compute tiles available.
 - Listen for player path selections, advance one tile whenever the step budget allows, and respect animation timing.
@@ -40,7 +47,7 @@
 
 ### Code locations
 - Native bridge: `ios/`
-- Qt client UI and controller: `vcmiqt/`, `client/`
+- Qt helper and launcher UI: `vcmiqt/`, `launcher/`, `client/`
 - Hero movement requests: `client/` to `server/`
 - Config and mods: `Mods/`, `config/`
 - Build documentation: `docs/developers/Building_iOS.md`
@@ -64,7 +71,7 @@
 2. Test step throttling, dialog/battle pauses, and interrupted paths; iterate on tuning.
 
 ## MVP Plan for agents
-1. Lock gameplay to one hero, disable AI additions, and hide economy through a mod.
+1. Lock gameplay to one hero, disable AI players, and hide economy through a mod.
 2. Add a desktop debug provider that increments steps via hotkey or timer for development.
 3. Build `StepMovementController` that consumes steps, advances tiles, and handles path cancelation.
 4. Create HUD for step counter.
