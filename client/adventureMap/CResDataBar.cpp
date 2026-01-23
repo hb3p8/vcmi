@@ -23,6 +23,7 @@
 #include "../../lib/callback/CCallback.h"
 #include "../../lib/texts/CGeneralTextHandler.h"
 #include "../../lib/ResourceSet.h"
+#include "../../lib/IGameSettings.h"
 #include "../../lib/GameLibrary.h"
 
 CResDataBar::CResDataBar(const ImagePath & imageName, const Point & position)
@@ -71,6 +72,9 @@ std::string CResDataBar::buildDateString()
 
 void CResDataBar::showAll(Canvas & to)
 {
+	if (GAME->interface()->cb->getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED))
+		return;
+
 	CIntObject::showAll(to);
 
 	//TODO: all this should be labels, but they require proper text update on change

@@ -48,6 +48,7 @@
 #include "../../lib/mapping/CMapInfo.h"
 #include "../../lib/mapping/CMapHeader.h"
 #include "../../lib/GameLibrary.h"
+#include "../../lib/IGameSettings.h"
 
 static JsonPath optionsTabConfigLocation()
 {
@@ -1153,6 +1154,14 @@ void OptionsTab::PlayerOptionsEntry::updateName() {
 
 void OptionsTab::onSetPlayerClicked(const PlayerSettings & ps) const
 {
+	const bool stepMode = LIBRARY->engineSettings()->getBoolean(EGameSettings::STEP_MODE_ENABLED);
+	if (stepMode)
+	{
+		if (ps.isControlledByAI() || humanPlayers == 0)
+			GAME->server().setPlayer(ps.color);
+		return;
+	}
+
 	if(ps.isControlledByAI() || humanPlayers > 1)
 		GAME->server().setPlayer(ps.color);
 }

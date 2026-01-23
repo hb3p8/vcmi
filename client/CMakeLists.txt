@@ -444,6 +444,10 @@ if(IOS)
 	set(vcmiclientcommon_HEADERS ${vcmiclientcommon_HEADERS}
 		ios/utils.h
 	)
+	set_source_files_properties(
+		ios/utils.mm
+		PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+	)
 endif()
 
 assign_source_group(${vcmiclientcommon_SRCS} ${vcmiclientcommon_HEADERS})

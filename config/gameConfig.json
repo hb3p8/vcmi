@@ -728,7 +728,9 @@
 			// if enabled, certain artifacts can be granted to creatures (WoG feature)
 			"stackArtifact": false,
 			// if enabled, all heroes gain commander creature in battle (WoG feature)
-			"commanders": false
+			"commanders": false,
+			// if enabled, prototype step-driven exploration rules apply
+			"stepModeEnabled": false
 		},
 		
 		"pathfinder" :

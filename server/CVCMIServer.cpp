@@ -17,6 +17,7 @@
 
 #include "../lib/CThreadHelper.h"
 #include "../lib/GameLibrary.h"
+#include "../lib/IGameSettings.h"
 #include "../lib/campaign/CampaignState.h"
 #include "../lib/entities/hero/CHeroHandler.h"
 #include "../lib/entities/hero/CHeroClass.h"
@@ -549,6 +550,21 @@ void CVCMIServer::updateStartInfoOnMapChange(std::shared_ptr<CMapInfo> mapInfo, 
 			si->mapGenOptions.reset();
 	}
 
+	if (LIBRARY->engineSettings()->getBoolean(EGameSettings::STEP_MODE_ENABLED))
+	{
+		PlayerConnectionID keptHuman = PlayerConnectionID::INVALID;
+		for (auto & entry : si->playerInfos)
+		{
+			if (!entry.second.isControlledByHuman())
+				continue;
+
+			if (keptHuman == PlayerConnectionID::INVALID)
+				keptHuman = *entry.second.connectedPlayerIDs.begin();
+			else
+				setPlayerConnectedId(entry.second, PlayerConnectionID::PLAYER_AI);
+		}
+	}
+
 	if (lobbyProcessor)
 	{
 		std::string roomDescription;
@@ -608,6 +624,7 @@ void CVCMIServer::setPlayer(PlayerColor clickedColor)
 
 	PlayerToRestore playerToRestore;
 	PlayerSettings & clicked = si->playerInfos[clickedColor];
+	const bool stepMode = LIBRARY->engineSettings()->getBoolean(EGameSettings::STEP_MODE_ENABLED);
 
 	//identify clicked player
 	PlayerConnectionID clickedNameID = PlayerConnectionID::PLAYER_AI;
@@ -626,19 +643,45 @@ void CVCMIServer::setPlayer(PlayerColor clickedColor)
 	//who will be put here?
 	if(clickedNameID == PlayerConnectionID::PLAYER_AI) //AI player clicked -> if possible replace computer with unallocated player
 	{
-		newPlayer = getIdOfFirstUnallocatedPlayer();
-		if(newPlayer == PlayerConnectionID::PLAYER_AI) //no "free" player -> get just first one
-			newPlayer = playerNames.begin()->first;
+		if (stepMode)
+		{
+			PlayerConnectionID existingHuman = PlayerConnectionID::INVALID;
+			for (const auto & entry : si->playerInfos)
+			{
+				if (entry.second.isControlledByHuman())
+				{
+					existingHuman = *entry.second.connectedPlayerIDs.begin();
+					break;
+				}
+			}
+
+			newPlayer = existingHuman != PlayerConnectionID::INVALID ? existingHuman : getIdOfFirstUnallocatedPlayer();
+			if(newPlayer == PlayerConnectionID::PLAYER_AI && !playerNames.empty()) //no "free" player -> get just first one
+				newPlayer = playerNames.begin()->first;
+		}
+		else
+		{
+			newPlayer = getIdOfFirstUnallocatedPlayer();
+			if(newPlayer == PlayerConnectionID::PLAYER_AI) //no "free" player -> get just first one
+				newPlayer = playerNames.begin()->first;
+		}
 	}
 	else //human clicked -> take next
 	{
-		auto i = playerNames.find(clickedNameID); //clicked one
-		i++; //player AFTER clicked one
-
-		if(i != playerNames.end())
-			newPlayer = i->first;
+		if (stepMode)
+		{
+			newPlayer = PlayerConnectionID::PLAYER_AI;
+		}
 		else
-			newPlayer = PlayerConnectionID::PLAYER_AI; //AI if we scrolled through all players
+		{
+			auto i = playerNames.find(clickedNameID); //clicked one
+			i++; //player AFTER clicked one
+
+			if(i != playerNames.end())
+				newPlayer = i->first;
+			else
+				newPlayer = PlayerConnectionID::PLAYER_AI; //AI if we scrolled through all players
+		}
 	}
 
 	setPlayerConnectedId(clicked, newPlayer); //put player
@@ -1146,4 +1189,3 @@ void CVCMIServer::sendPack(CPackForClient & pack, GameConnectionID connectionID)
 		if (c->connectionID == connectionID)
 			c->sendPack(pack);
 }
-

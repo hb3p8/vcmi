@@ -52,11 +52,14 @@ const CGHeroInstance * CWindowWithArtifacts::getHeroPickedArtifact() const
 	const CGHeroInstance * hero = nullptr;
 
 	for(const auto & artSet : artSets)
-		if(const auto pickedArt = artSet->getHero()->getArt(ArtifactPosition::TRANSITION_POS))
+	{
+		const CArtifactInstance * pickedArt = artSet->getHero()->getArt(ArtifactPosition::TRANSITION_POS);
+		if(pickedArt != nullptr)
 		{
 			hero = artSet->getHero();
 			break;
 		}
+	}
 	return hero;
 }
 
@@ -213,7 +216,7 @@ void CWindowWithArtifacts::markPossibleSlots() const
 bool CWindowWithArtifacts::checkSpecialArts(const CArtifactInstance & artInst, const CGHeroInstance & hero, bool isTrade) const
 {
 	const auto artId = artInst.getTypeId();
-	
+
 	if(artId == ArtifactID::SPELLBOOK)
 	{
 		ENGINE->windows().createAndPushWindow<CSpellWindow>(&hero, GAME->interface(), GAME->interface()->battleInt.get());

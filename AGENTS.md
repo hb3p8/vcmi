@@ -96,4 +96,4 @@
 - Avoid adding Conan-generated preset includes to `CMakeUserPresets.json` to prevent duplicate preset names (like `conan-release`).
 
 # Workflow
-You need to think through, analyse and draft a spec for implementing a feature. Put it into `drafts/###-objective-description.md`, where number is incrementing from `001`. Make sure to restate the task and outline steps for implementing it. Provide sample code snippets if needed to demonstrate. When choosing what to draft next, think what is necessary to do next within the MVP scope outlined in this document.
+You need to think through, analyse and draft a spec for implementing a feature. Put it into `drafts/###-objective-description.md`, where number is incrementing from `001`. Make sure to restate the task and outline steps for implementing it. Provide sample code snippets if needed to demonstrate. When choosing what to draft next, think what is necessary to do next within the MVP scope outlined in this document. When implementing the task reflect what did not go as planned in respective draft file (in section Deviations During Implementation). After implementation verify that macos build compiles.

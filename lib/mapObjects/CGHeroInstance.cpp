@@ -562,7 +562,11 @@ void CGHeroInstance::onHeroVisit(IGameEventCallback & gameEvents, const CGHeroIn
 	}
 	else if(ID == Obj::PRISON)
 	{
-		if (cb->getHeroCount(h->tempOwner, false) < cb->getSettings().getInteger(EGameSettings::HEROES_PER_PLAYER_ON_MAP_CAP))//free hero slot
+		const bool stepMode = cb->getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
+		const bool hasHeroSlot = stepMode
+			? cb->getHeroCount(h->tempOwner, true) < 1
+			: cb->getHeroCount(h->tempOwner, false) < cb->getSettings().getInteger(EGameSettings::HEROES_PER_PLAYER_ON_MAP_CAP);
+		if (hasHeroSlot)//free hero slot
 		{
 			//update hero parameters
 			SetMovePoints smp;

@@ -2496,6 +2496,20 @@ void CGameHandler::moveArmy(const CArmedInstance *src, const CArmedInstance *dst
 bool CGameHandler::garrisonSwap(ObjectInstanceID tid)
 {
 	const CGTownInstance * town = gameInfo().getTown(tid);
+	if (gameInfo().getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED))
+	{
+		const PlayerColor owner = town ? town->tempOwner : PlayerColor::CANNOT_DETERMINE;
+		if (town && gameInfo().getHeroCount(owner, true) > 1)
+		{
+			complain("Step Mode: only one hero allowed.");
+			return false;
+		}
+		if (town && town->getGarrisonHero() && town->getVisitingHero())
+		{
+			complain("Step Mode: garrison and visiting heroes are not allowed together.");
+			return false;
+		}
+	}
 	if (!town->getGarrisonHero() && town->getVisitingHero()) //visiting => garrison, merge armies: town army => hero army
 	{
 

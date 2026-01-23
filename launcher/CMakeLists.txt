@@ -36,6 +36,13 @@ if(IOS)
 		ios/selectdirectory.mm
 		prepare_ios.mm
 	)
+	set_source_files_properties(
+		ios/launchGame.m
+		ios/revealdirectoryinfiles.mm
+		ios/selectdirectory.mm
+		prepare_ios.mm
+		PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+	)
 elseif(ANDROID)
 	list(APPEND launcher_SRCS
 		prepare_android.cpp

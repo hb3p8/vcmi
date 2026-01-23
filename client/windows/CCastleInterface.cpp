@@ -1736,6 +1736,17 @@ CHallInterface::CHallInterface(const CGTownInstance * Town):
 	exit = std::make_shared<CButton>(Point(748, 556), AnimationPath::builtin("TPMAGE1.DEF"), CButton::tooltip(LIBRARY->generaltexth->hcommands[8]), [&](){close();}, EShortcut::GLOBAL_RETURN);
 
 	auto & boxList = town->getTown()->clientInfo.hallSlots;
+	const bool stepMode = GAME->interface()->cb->getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
+	auto isStepModeHiddenBuilding = [](const BuildingID & id)
+	{
+		return id == BuildingID::MARKETPLACE
+			|| id == BuildingID::RESOURCE_SILO
+			|| id == BuildingID::MAGES_GUILD_1
+			|| id == BuildingID::MAGES_GUILD_2
+			|| id == BuildingID::MAGES_GUILD_3
+			|| id == BuildingID::MAGES_GUILD_4
+			|| id == BuildingID::MAGES_GUILD_5;
+	};
 	boxes.resize(boxList.size());
 	for(size_t row=0; row<boxList.size(); row++) //for each row
 	{
@@ -1749,6 +1760,9 @@ CHallInterface::CHallInterface(const CGTownInstance * Town):
 					logMod->warn("Invalid building ID found in hallSlots of town '%s'", town->getFaction()->getJsonKey() );
 					continue;
 				}
+
+				if (stepMode && isStepModeHiddenBuilding(buildingID))
+					continue;
 
 				const CBuilding * current = town->getTown()->buildings.at(buildingID).get();
 				if(town->hasBuilt(buildingID))

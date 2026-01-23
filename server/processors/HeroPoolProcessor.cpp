@@ -162,6 +162,10 @@ bool HeroPoolProcessor::hireHero(const ObjectInstanceID & objectID, const HeroTy
 	if (playerState->resources[EGameResID::GOLD] < GameConstants::HERO_GOLD_COST && gameHandler->complain("Not enough gold for buying hero!"))
 		return false;
 
+	const bool stepMode = gameHandler->gameInfo().getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
+	if (stepMode && gameHandler->gameInfo().getHeroCount(player, true) >= 1 && gameHandler->complain("Step Mode: only one hero allowed."))
+		return false;
+
 	if (gameHandler->gameInfo().getHeroCount(player, false) >= gameHandler->gameInfo().getSettings().getInteger(EGameSettings::HEROES_PER_PLAYER_ON_MAP_CAP) && gameHandler->complain("Cannot hire hero, too many wandering heroes already!"))
 		return false;
 

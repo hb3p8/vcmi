@@ -148,7 +148,8 @@
 			"properties" : {
 				"stackExperience" : { "type" : "boolean" },
 				"stackArtifact" : { "type" : "boolean" },
-				"commanders" : { "type" : "boolean" }
+				"commanders" : { "type" : "boolean" },
+				"stepModeEnabled" : { "type" : "boolean" }
 			}
 		},
 		"pathfinder": {

@@ -100,6 +100,7 @@ const std::vector<GameSettings::SettingOption> GameSettings::settingProperties =
 		{EGameSettings::MODULE_COMMANDERS,                                "modules",   "commanders"                           },
 		{EGameSettings::MODULE_STACK_ARTIFACT,                            "modules",   "stackArtifact"                        },
 		{EGameSettings::MODULE_STACK_EXPERIENCE,                          "modules",   "stackExperience"                      },
+		{EGameSettings::STEP_MODE_ENABLED,                                "modules",   "stepModeEnabled"                      },
 		{EGameSettings::PATHFINDER_IGNORE_GUARDS,                         "pathfinder", "ignoreGuards"                        },
 		{EGameSettings::PATHFINDER_ORIGINAL_FLY_RULES,                    "pathfinder", "originalFlyRules"                    },
 		{EGameSettings::PATHFINDER_USE_BOAT,                              "pathfinder", "useBoat"                             },

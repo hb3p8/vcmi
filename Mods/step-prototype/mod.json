@@ -1,0 +1,18 @@
+{
+	"name" : "Step Prototype",
+	"description" : "Step-driven adventure prototype settings and UI trims.",
+	"version" : "0.1",
+	"author" : "VCMI Team",
+	"contact" : "local",
+	"modType" : "Mechanics",
+	"settings" : {
+		"heroes" : {
+			"perPlayerOnMapCap" : 1,
+			"perPlayerTotalCap" : 1
+		},
+		"modules" : {
+			"stepModeEnabled" : true
+		}
+	},
+	"factions" : [ "config/factions/step-prototype.json" ]
+}
