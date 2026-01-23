@@ -7,8 +7,8 @@
 ## Prototype Concept
 - Replace adventure map movement points with real-world steps captured on iPhone or Apple Watch.
 - Keep the world exploration- and story-oriented; hide or minimize strategy economy systems and towns.
-- Queue a destination normally, then spend a step budget so every N steps advances the hero one tile.
-- Keep tactical battles unchanged, triggered by map interactions.
+- Queue a destination normally, confirm movement, then spend a step budget so every N steps advances the hero one tile.
+- Keep tactical battles unchanged for now, triggered by map interactions.
 
 ## Guardrails
 - Add native bridges under `ios/` and client logic under `vcmiqt/`; avoid sweeping engine refactors.
@@ -71,11 +71,11 @@
 2. Test step throttling, dialog/battle pauses, and interrupted paths; iterate on tuning.
 
 ## MVP Plan for agents
-1. Lock gameplay to one hero, disable AI players, and hide economy through a mod.
+1. Lock gameplay to one hero per player, keep one human player, and allow a second non-human slot for autonomous neutral/hostile actors if needed; hide economy through a mod.
    - Create `Mods/step-prototype/mod.json` and populate overrides under `Mods/step-prototype/Content/config/` so `gameConfig.json` sets `settings.heroes.perPlayerOnMapCap = 1`, `settings.heroes.perPlayerTotalCap = 1`, and introduces a boolean `stepModeEnabled` that core code can read.
    - Register the new flag in settings plumbing: add `STEP_MODE_ENABLED` to `EGameSettings` (`lib/IGameSettings.h:55`), map it in `lib/GameSettings.cpp:78` and default it in the constructor, and extend the schema at `config/schemas/gameSettings.json:41` so mods validate.
    - Enforce the single-hero cap wherever heroes leave or enter play by checking the flag in `server/processors/HeroPoolProcessor.cpp:165`, `server/CGameHandler.cpp:2503`, and `lib/mapObjects/CGHeroInstance.cpp:565` before allowing recruitment, garrison swaps, or similar flows.
-   - Lock the lobby to one human by short-circuiting `OptionsTab::onSetPlayerClicked` (`client/lobby/OptionsTab.cpp:1154`), tightening `CVCMIServer::setPlayer` (`server/CVCMIServer.cpp:599`), and folding extra `playerInfos` to AI inside `updateStartInfoOnMapChange` (`server/CVCMIServer.cpp:487`) when Step mode is active.
+   - Lock the lobby to one human but allow a second non-human slot if needed: short-circuit `OptionsTab::onSetPlayerClicked` (`client/lobby/OptionsTab.cpp:1154`) so only one human can be assigned, tighten `CVCMIServer::setPlayer` (`server/CVCMIServer.cpp:599`), and fold any extra `playerInfos` to AI inside `updateStartInfoOnMapChange` (`server/CVCMIServer.cpp:487`) when Step mode is active.
    - Hide the economy layer when the flag is set: filter out marketplace/resource slots while building the hall grid in `client/windows/CCastleInterface.cpp:1738`, skip drawing the adventure-map resource bar in `client/adventureMap/CResDataBar.cpp:35`, and drop unused buildings via faction overrides under `Mods/step-prototype/Content/config/factions/`.
    - Convert turn/day flow into an endless turn: guard the daily start/end-turn cycle in `server/CGameHandler.cpp` with `stepModeEnabled` so the single player never auto-ends; move daily/weekly resource processing into a real-time scheduler in `server/processors/NewTurnProcessor.cpp`; and treat network turn notifications as no-ops on the client (`client/GameInstance.cpp`, `client/GameEngine.cpp`) while the flag is active.
 2. Add a desktop debug provider that increments steps via hotkey or timer for development.
@@ -83,3 +83,17 @@
 4. Create HUD for step counter.
 5. Implement the iOS step provider with `CMPedometer`, exposing `stepsUpdated(totalSteps)` to Qt.
 6. Tie day advancement to real time by ending and restarting the player turn on schedule.
+
+## Local build setup (macOS + iOS)
+- Keep separate Conan output folders to avoid toolchain clashes: `conan-generated-macos/` and `conan-generated-ios/` (do not reuse `conan-generated/` across platforms).
+- Regenerate toolchains when dependencies change:
+  - macOS: `conan install . --output-folder=conan-generated-macos --profile=dependencies/conan_profiles/macos-arm --profile=dependencies/conan_profiles/base/apple-system --build=never`
+  - iOS: `conan install . --output-folder=conan-generated-ios --profile=dependencies/conan_profiles/ios-arm64 --profile=dependencies/conan_profiles/base/apple-system --build=never`
+- Use local presets that pin each toolchain and build dir (see `CMakeUserPresets.json`):
+  - macOS configure/build: `cmake --preset macos-conan-ninja-release-local` then `cmake --build --preset macos-conan-ninja-release-local`
+  - iOS configure/build: `cmake --preset ios-device-conan-local` then `cmake --build --preset ios-device-conan-local`
+- Keep build directories distinct: `out/build/macos-conan-ninja-release-local` for macOS, `out/build/build-ios-device` for iOS (change in `CMakeUserPresets.json` if you want a different path).
+- Avoid adding Conan-generated preset includes to `CMakeUserPresets.json` to prevent duplicate preset names (like `conan-release`).
+
+# Workflow
+You need to think through, analyse and draft a spec for implementing a feature. Put it into `drafts/###-objective-description.md`, where number is incrementing from `001`. Make sure to restate the task and outline steps for implementing it. Provide sample code snippets if needed to demonstrate. When choosing what to draft next, think what is necessary to do next within the MVP scope outlined in this document.
