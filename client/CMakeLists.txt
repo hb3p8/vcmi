@@ -186,6 +186,8 @@ set(vcmiclientcommon_SRCS
 	windows/settings/AdventureOptionsTab.cpp
 	windows/settings/KeyBindingsWindow.cpp
 
+	step/StepDebugProvider.cpp
+
 	xBRZ/xbrz.cpp
 
 	ArtifactsUIController.cpp

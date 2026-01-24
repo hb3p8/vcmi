@@ -16,6 +16,7 @@ class GlobalLobbyClient;
 class CPlayerInterface;
 class CMapHandler;
 class CMainMenu;
+class StepDebugProvider;
 
 VCMI_LIB_NAMESPACE_BEGIN
 class INetworkHandler;
@@ -36,6 +37,7 @@ class GameInstance final : boost::noncopyable, public IGameEngineUser
 	std::unique_ptr<CMapHandler> mapInstance;
 	std::shared_ptr<CMainMenu> mainMenuInstance;
 	CPlayerInterface * interfaceInstance;
+	std::unique_ptr<StepDebugProvider> stepDebugProviderInstance;
 
 public:
 	GameInstance();
@@ -43,6 +45,7 @@ public:
 
 	CServerHandler & server();
 	CMapHandler & map();
+	StepDebugProvider & stepDebugProvider();
 
 	std::shared_ptr<CMainMenu> mainmenu();
 	CPlayerInterface * interface();

@@ -122,6 +122,8 @@ enum class EShortcut
 
 	// In-game hotkeys, require game state but may be available in windows other than adventure map
 	GAME_ACTIVATE_CONSOLE, // Tab, activates in-game console
+	STEP_DEBUG_ADD, // Debug: add steps to step provider
+	STEP_DEBUG_TOGGLE_TIMER, // Debug: toggle step timer
 
 	// Adventure map screen
 	ADVENTURE_GAME_OPTIONS, // 'o', Open CAdventureOptions window

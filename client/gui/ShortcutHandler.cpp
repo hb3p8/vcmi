@@ -172,6 +172,8 @@ EShortcut ShortcutHandler::findShortcut(const std::string & identifier ) const
 		{"adventureMarketplace",     EShortcut::ADVENTURE_MARKETPLACE     },
 		{"adventureThievesGuild",    EShortcut::ADVENTURE_THIEVES_GUILD   },
 		{"gameActivateConsole",      EShortcut::GAME_ACTIVATE_CONSOLE     },
+		{"stepDebugAdd",             EShortcut::STEP_DEBUG_ADD            },
+		{"stepDebugToggleTimer",     EShortcut::STEP_DEBUG_TOGGLE_TIMER   },
 		{"adventureGameOptions",     EShortcut::ADVENTURE_GAME_OPTIONS    },
 		{"adventureToggleGrid",      EShortcut::ADVENTURE_TOGGLE_GRID     },
 		{"adventureToggleVisitable", EShortcut::ADVENTURE_TOGGLE_VISITABLE},

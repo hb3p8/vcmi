@@ -98,6 +98,8 @@
 		"exchangeEquippedToLeft":   [],
 		"exchangeEquippedToRight":  [],
 		"gameActivateConsole":      "Tab",
+		"stepDebugAdd":             "Ctrl+Shift+P",
+		"stepDebugToggleTimer":     "Ctrl+Shift+T",
 		"globalAccept":             [ "Return", "Keypad Enter"],
 		"globalBackspace":          "Backspace",
 		"globalCancel":             "Escape",

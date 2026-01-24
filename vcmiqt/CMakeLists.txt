@@ -1,6 +1,9 @@
 set(vcmiqt_SRCS
 		StdInc.cpp
 
+		DebugStepInputProvider.cpp
+		StepInputProvider.cpp
+		StepInputProviderFactory.cpp
 		jsonutils.cpp
 		launcherdirs.cpp
 )
@@ -8,7 +11,10 @@ set(vcmiqt_SRCS
 set(vcmiqt_HEADERS
 		StdInc.h
 
+		DebugStepInputProvider.h
 		MessageBox.h
+		StepInputProvider.h
+		StepInputProviderFactory.h
 		jsonutils.h
 		launcherdirs.h
 		convpathqstring.h
@@ -16,6 +22,9 @@ set(vcmiqt_HEADERS
 )
 
 assign_source_group(${vcmiqt_SRCS} ${vcmiqt_HEADERS})
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if(ENABLE_STATIC_LIBS OR NOT (ENABLE_EDITOR AND ENABLE_LAUNCHER))
 	add_library(vcmiqt STATIC ${vcmiqt_SRCS} ${vcmiqt_HEADERS})

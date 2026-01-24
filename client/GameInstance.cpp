@@ -17,6 +17,7 @@
 #include "globalLobby/GlobalLobbyClient.h"
 #include "mainmenu/CMainMenu.h"
 #include "windows/InfoWindows.h"
+#include "step/StepDebugProvider.h"
 
 #include "../lib/CConfigHandler.h"
 #include "../lib/GameLibrary.h"
@@ -27,6 +28,7 @@ std::unique_ptr<GameInstance> GAME = nullptr;
 GameInstance::GameInstance()
 	: serverInstance(std::make_unique<CServerHandler>())
 	, interfaceInstance(nullptr)
+	, stepDebugProviderInstance(std::make_unique<StepDebugProvider>())
 {
 }
 
@@ -46,6 +48,11 @@ CMapHandler & GameInstance::map()
 		throw std::runtime_error("Invalid access to GameInstance::map");
 
 	return *mapInstance;
+}
+
+StepDebugProvider & GameInstance::stepDebugProvider()
+{
+	return *stepDebugProviderInstance;
 }
 
 std::shared_ptr<CMainMenu> GameInstance::mainmenu()
@@ -86,6 +93,7 @@ void GameInstance::onGlobalLobbyInterfaceActivated()
 
 void GameInstance::onUpdate()
 {
+	stepDebugProviderInstance->update();
 	if (interfaceInstance)
 		interfaceInstance->update();
 }
