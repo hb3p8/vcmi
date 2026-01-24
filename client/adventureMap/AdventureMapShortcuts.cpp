@@ -119,7 +119,8 @@ std::vector<AdventureMapShortcutState> AdventureMapShortcuts::getShortcuts()
 		{ EShortcut::ADVENTURE_SEARCH,           optionSidePanelActive(),[this]() { this->search(false); } },
 		{ EShortcut::ADVENTURE_SEARCH_CONTINUE,  optionSidePanelActive(),[this]() { this->search(true); } },
 		{ EShortcut::STEP_DEBUG_ADD,             optionInMapView(),      []() { GAME->stepDebugProvider().addSteps(100); } },
-		{ EShortcut::STEP_DEBUG_TOGGLE_TIMER,    optionInMapView(),      []() { GAME->stepDebugProvider().toggleTimer(); } }
+		{ EShortcut::STEP_DEBUG_TOGGLE_TIMER,    optionInMapView(),      []() { GAME->stepDebugProvider().toggleTimer(); } },
+		{ EShortcut::STEP_HUD_TOGGLE,            optionInMapView(),      [this]() { this->toggleStepHud(); } }
 	};
 	return result;
 }
@@ -186,6 +187,12 @@ void AdventureMapShortcuts::toggleBlocked()
 {
 	Settings s = settings.write["session"];
 	s["showBlocked"].Bool() = !settings["session"]["showBlocked"].Bool();
+}
+
+void AdventureMapShortcuts::toggleStepHud()
+{
+	Settings s = settings.write["adventure"];
+	s["stepHudVisible"].Bool() = !settings["adventure"]["stepHudVisible"].Bool();
 }
 
 void AdventureMapShortcuts::toggleSleepWake()

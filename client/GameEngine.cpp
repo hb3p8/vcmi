@@ -32,7 +32,9 @@
 #include "renderSDL/ScreenHandler.h"
 #include "renderSDL/RenderHandler.h"
 #include "GameEngineUser.h"
+#include "GameInstance.h"
 #include "battle/BattleInterface.h"
+#include "step/StepDebugProvider.h"
 
 #include "../lib/AsyncRunner.h"
 #include "../lib/CConfigHandler.h"
@@ -204,8 +206,10 @@ void GameEngine::drawPerformanceOverlay()
 	std::string fps = std::to_string(framerate().getFramerate())+" FPS";
 	std::string time = TextOperations::getFormattedTimeLocal(std::time(nullptr));
 	std::string power = powerState.powerState == PowerStateMode::UNKNOWN ? "" : powerSymbol + std::to_string(powerState.percent) + "%";
+	int64_t steps = GAME ? GAME->stepDebugProvider().totalSteps() : 0;
+	std::string stepText = "Steps: " + std::to_string(steps);
 
-	std::string textToDisplay = time + (power.empty() ? "" : " | " + power) + " | " + fps;
+	std::string textToDisplay = time + (power.empty() ? "" : " | " + power) + " | " + stepText + " | " + fps;
 
 	maxPerformanceOverlayTextWidth = std::max(maxPerformanceOverlayTextWidth, static_cast<int>(fontPtr->getStringWidth(textToDisplay))); // do not get smaller (can cause graphical glitches)
 

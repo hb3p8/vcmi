@@ -174,6 +174,7 @@ EShortcut ShortcutHandler::findShortcut(const std::string & identifier ) const
 		{"gameActivateConsole",      EShortcut::GAME_ACTIVATE_CONSOLE     },
 		{"stepDebugAdd",             EShortcut::STEP_DEBUG_ADD            },
 		{"stepDebugToggleTimer",     EShortcut::STEP_DEBUG_TOGGLE_TIMER   },
+		{"stepHudToggle",            EShortcut::STEP_HUD_TOGGLE           },
 		{"adventureGameOptions",     EShortcut::ADVENTURE_GAME_OPTIONS    },
 		{"adventureToggleGrid",      EShortcut::ADVENTURE_TOGGLE_GRID     },
 		{"adventureToggleVisitable", EShortcut::ADVENTURE_TOGGLE_VISITABLE},

@@ -100,6 +100,7 @@
 		"gameActivateConsole":      "Tab",
 		"stepDebugAdd":             "Ctrl+Shift+P",
 		"stepDebugToggleTimer":     "Ctrl+Shift+T",
+		"stepHudToggle":            "Ctrl+Shift+H",
 		"globalAccept":             [ "Return", "Keypad Enter"],
 		"globalBackspace":          "Backspace",
 		"globalCancel":             "Escape",

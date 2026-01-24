@@ -235,6 +235,8 @@ int main(int argc, char * argv[])
 	}
 
 	Settings session = settings.write["session"];
+	Settings video = settings.write["video"];
+	video["showIntro"].Bool() = false;
 	auto setSettingBool = [&](const std::string & key, const std::string & arg) {
 		Settings s = settings.write(vstd::split(key, "/"));
 		if(vm.count(arg))

@@ -53,6 +53,7 @@ class AdventureMapWidget : public InterfaceObjectConfigurable
 	std::shared_ptr<CIntObject> buildMapTownList(const JsonNode & input);
 	std::shared_ptr<CIntObject> buildMinimap(const JsonNode & input);
 	std::shared_ptr<CIntObject> buildResourceDateBar(const JsonNode & input);
+	std::shared_ptr<CIntObject> buildStepCounterHud(const JsonNode & input);
 	std::shared_ptr<CIntObject> buildStatusBar(const JsonNode & input);
 	std::shared_ptr<CIntObject> buildTexturePlayerColored(const JsonNode &);
 

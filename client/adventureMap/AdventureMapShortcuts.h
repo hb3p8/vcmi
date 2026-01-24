@@ -47,6 +47,7 @@ class AdventureMapShortcuts
 	void toggleGrid();
 	void toggleVisitable();
 	void toggleBlocked();
+	void toggleStepHud();
 	void toggleSleepWake();
 	void setHeroSleeping();
 	void setHeroAwake();

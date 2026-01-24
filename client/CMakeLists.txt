@@ -11,6 +11,7 @@ set(vcmiclientcommon_SRCS
 	adventureMap/CMinimap.cpp
 	adventureMap/CResDataBar.cpp
 	adventureMap/MapAudioPlayer.cpp
+	adventureMap/StepCounterHud.cpp
 	adventureMap/TurnTimerWidget.cpp
 
 	battle/BattleActionsController.cpp
@@ -220,6 +221,7 @@ set(vcmiclientcommon_HEADERS
 	adventureMap/CMinimap.h
 	adventureMap/CResDataBar.h
 	adventureMap/MapAudioPlayer.h
+	adventureMap/StepCounterHud.h
 	adventureMap/TurnTimerWidget.h
 
 	battle/BattleActionsController.h

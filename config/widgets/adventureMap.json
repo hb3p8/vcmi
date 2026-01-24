@@ -845,6 +845,11 @@
 				}
 			]
 		},
+		{
+			"type": "adventureStepCounterHud",
+			"name" : "stepCounterHud",
+			"area": { "left": 60, "top" : 12, "width" : 150, "height" : 32 }
+		},
 		// GEMS - set of images with different image for each player
 		{
 			"type": "adventureMapContainer",

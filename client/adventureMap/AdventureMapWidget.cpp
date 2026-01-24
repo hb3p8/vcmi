@@ -16,6 +16,7 @@
 #include "CMinimap.h"
 #include "CResDataBar.h"
 #include "AdventureState.h"
+#include "StepCounterHud.h"
 
 #include "../GameEngine.h"
 #include "../GameInstance.h"
@@ -53,6 +54,7 @@ AdventureMapWidget::AdventureMapWidget( std::shared_ptr<AdventureMapShortcuts> s
 	REGISTER_BUILDER("adventureMapTownList",     &AdventureMapWidget::buildMapTownList     );
 	REGISTER_BUILDER("adventureMinimap",         &AdventureMapWidget::buildMinimap         );
 	REGISTER_BUILDER("adventureResourceDateBar", &AdventureMapWidget::buildResourceDateBar );
+	REGISTER_BUILDER("adventureStepCounterHud",  &AdventureMapWidget::buildStepCounterHud  );
 	REGISTER_BUILDER("adventureStatusBar",       &AdventureMapWidget::buildStatusBar       );
 	REGISTER_BUILDER("adventurePlayerTexture",   &AdventureMapWidget::buildTexturePlayerColored);
 
@@ -297,6 +299,12 @@ std::shared_ptr<CIntObject> AdventureMapWidget::buildResourceDateBar(const JsonN
 	result->setDatePosition(Point(input["date"]["x"].Integer(), input["date"]["y"].Integer()));
 
 	return result;
+}
+
+std::shared_ptr<CIntObject> AdventureMapWidget::buildStepCounterHud(const JsonNode & input)
+{
+	Rect area = readTargetArea(input["area"]);
+	return std::make_shared<StepCounterHud>(area);
 }
 
 std::shared_ptr<CIntObject> AdventureMapWidget::buildStatusBar(const JsonNode & input)
