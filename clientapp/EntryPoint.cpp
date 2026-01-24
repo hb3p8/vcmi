@@ -34,6 +34,7 @@
 #include "../lib/ExceptionsCommon.h"
 #include "../lib/filesystem/Filesystem.h"
 #include "../lib/logging/CBasicLogConfigurator.h"
+#include "../lib/mapping/CMapInfo.h"
 #include "../lib/modding/IdentifierStorage.h"
 #include "../lib/modding/CModHandler.h"
 #include "../lib/modding/ModDescription.h"
@@ -154,6 +155,8 @@ int main(int argc, char * argv[])
 		("ai", po::value<std::vector<std::string>>(), "AI to be used for the player, can be specified several times for the consecutive players")
 		("oneGoodAI", "puts one default AI and the rest will be EmptyAI")
 		("autoSkip", "automatically skip turns in GUI")
+		("quickstart-map", po::value<std::string>(), "start map in single-player and skip menus")
+		("quickstart-save", po::value<std::string>(), "start save in single-player and skip menus")
 		("disable-video", "disable video player")
 		("nointro,i", "skips intro movies")
 		("donotstartserver,d","do not attempt to start server and just connect to it instead server")
@@ -302,7 +305,7 @@ int main(int argc, char * argv[])
 
 	if (ENGINE)
 		ENGINE->setEngineUser(GAME.get());
-	
+
 #ifndef VCMI_NO_THREADED_LOAD
 	//we can properly play intro only in the main thread, so we have to move loading to the separate thread
 	std::thread loading([]()
@@ -350,20 +353,58 @@ int main(int argc, char * argv[])
 	session["autoSkip"].Bool()  = vm.count("autoSkip");
 	session["oneGoodAI"].Bool() = vm.count("oneGoodAI");
 	session["aiSolo"].Bool() = false;
-	
-	if(vm.count("testmap"))
+
+	std::string quickstartMap;
+	std::string quickstartSave;
+
+	if(vm.count("quickstart-map"))
+		quickstartMap = vm["quickstart-map"].as<std::string>();
+
+	if(vm.count("quickstart-save"))
+		quickstartSave = vm["quickstart-save"].as<std::string>();
+	if(!quickstartMap.empty() && !quickstartSave.empty())
+		logGlobal->warn("Both quickstart-map and quickstart-save were provided. Using quickstart-save.");
+
+	bool quickstartStarted = false;
+	if(!quickstartMap.empty() || !quickstartSave.empty())
+	{
+		bool loadSave = !quickstartSave.empty();
+		std::string filename = loadSave ? quickstartSave : quickstartMap;
+		ResourcePath path(filename, loadSave ? EResType::SAVEGAME : EResType::MAP);
+
+		if(!CResourceHandler::get()->existsResource(path))
+		{
+			std::string message = "Quickstart file not found: " + filename;
+			logGlobal->error("%s", message);
+			if (!settings["session"]["headless"].Bool())
+				CInfoWindow::showInfoDialog(message, {});
+		}
+		else
+		{
+			auto mapInfo = std::make_shared<CMapInfo>();
+			if(loadSave)
+				mapInfo->saveInit(path);
+			else
+				mapInfo->mapInit(filename);
+
+			GAME->server().quickStartSinglePlayer(mapInfo, loadSave);
+			quickstartStarted = true;
+		}
+	}
+
+	if(!quickstartStarted && vm.count("testmap"))
 	{
 		session["testmap"].String() = vm["testmap"].as<std::string>();
 		session["onlyai"].Bool() = true;
 		GAME->server().debugStartTest(session["testmap"].String(), false);
 	}
-	else if(vm.count("testsave"))
+	else if(!quickstartStarted && vm.count("testsave"))
 	{
 		session["testsave"].String() = vm["testsave"].as<std::string>();
 		session["onlyai"].Bool() = true;
 		GAME->server().debugStartTest(session["testsave"].String(), true);
 	}
-	else if (!settings["session"]["headless"].Bool())
+	else if(!quickstartStarted && !settings["session"]["headless"].Bool())
 	{
 		GAME->mainmenu()->makeActiveInterface();
 
@@ -373,7 +414,7 @@ int main(int argc, char * argv[])
 		else
 			GAME->mainmenu()->playMusic();
 	}
-	
+
 #ifndef VCMI_UNIX
 	// on Linux, name of main thread is also name of our process. Which we don't want to change
 	setThreadName("MainGUI");

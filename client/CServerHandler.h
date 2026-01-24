@@ -203,6 +203,7 @@ public:
 	void startMapAfterConnection(std::shared_ptr<CMapInfo> to);
 	bool validateGameStart(bool allowOnlyAI = false) const;
 	void debugStartTest(std::string filename, bool save = false);
+	void quickStartSinglePlayer(std::shared_ptr<CMapInfo> mapInfo, bool loadSave);
 
 	void startGameplay(std::shared_ptr<CGameState> gameState);
 	void showHighScoresAndEndGameplay(PlayerColor player, bool victory, const StatisticDataSet & statistic);

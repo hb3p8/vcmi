@@ -841,6 +841,30 @@ void CServerHandler::debugStartTest(std::string filename, bool save)
 	}
 }
 
+void CServerHandler::quickStartSinglePlayer(std::shared_ptr<CMapInfo> mapInfo, bool loadSave)
+{
+	if (!mapInfo)
+		throw std::runtime_error("Quickstart requested without map info");
+
+	if (loadSave)
+	{
+		resetStateForLobby(EStartMode::LOAD_GAME, ESelectionScreen::loadGame, EServerMode::LOCAL, {});
+		loadMode = ELoadMode::SINGLE;
+	}
+	else
+	{
+		resetStateForLobby(EStartMode::NEW_GAME, ESelectionScreen::newGame, EServerMode::LOCAL, {});
+		loadMode = ELoadMode::NONE;
+	}
+
+	startMapAfterConnection(mapInfo);
+
+	if(settings["session"]["donotstartserver"].Bool())
+		connectToServer(getLocalHostname(), getLocalPort());
+	else
+		startLocalServerAndConnect(false);
+}
+
 class ServerHandlerCPackVisitor : public VCMI_LIB_WRAP_NAMESPACE(ICPackVisitor)
 {
 private:
