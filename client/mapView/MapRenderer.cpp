@@ -15,6 +15,8 @@
 #include "mapHandler.h"
 
 #include "../GameEngine.h"
+#include "../GameInstance.h"
+#include "../CPlayerInterface.h"
 #include "../render/CAnimation.h"
 #include "../render/Canvas.h"
 #include "../render/IImage.h"
@@ -31,6 +33,14 @@
 #include "../../lib/mapObjects/ObjectTemplate.h"
 #include "../../lib/mapping/TerrainTile.h"
 #include "../../lib/pathfinder/CGPathNode.h"
+
+static bool isStepModeEnabled()
+{
+	if (!GAME || !GAME->interface())
+		return false;
+
+	return GAME->interface()->canStepMovement();
+}
 
 struct NeighborTilesInfo
 {
@@ -722,7 +732,7 @@ size_t MapRendererPath::selectImage(IMapRendererContext & context, const int3 & 
 	if(iter == path->nodes.end())
 		return std::numeric_limits<size_t>::max();
 
-	bool reachableToday = iter->turns == 0;
+	bool reachableToday = iter->turns == 0 || isStepModeEnabled();
 	if(iter == path->nodes.begin())
 		return selectImageCross(reachableToday, iter->coord);
 

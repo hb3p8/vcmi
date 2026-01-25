@@ -12,6 +12,7 @@
 
 #include "CPlayerInterface.h"
 #include "PlayerLocalState.h"
+#include "step/StepMovementController.h"
 #include "adventureMap/AdventureMapInterface.h"
 #include "eventsSDL/InputHandler.h"
 #include "GameEngine.h"
@@ -23,6 +24,7 @@
 #include "../lib/ConditionalWait.h"
 #include "../lib/CConfigHandler.h"
 #include "../lib/CRandomGenerator.h"
+#include "../lib/IGameSettings.h"
 #include "../lib/callback/CCallback.h"
 #include "../lib/pathfinder/CGPathNode.h"
 #include "../lib/mapObjects/CGHeroInstance.h"
@@ -30,6 +32,14 @@
 #include "../lib/networkPacks/PacksForClient.h"
 #include "../lib/RoadHandler.h"
 #include "../lib/TerrainHandler.h"
+
+static bool isStepModeEnabled()
+{
+	if (!GAME || !GAME->interface() || !GAME->interface()->cb)
+		return false;
+
+	return GAME->interface()->cb->getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
+}
 
 bool HeroMovementController::isHeroMovingThroughGarrison(const CGHeroInstance * hero, const CArmedInstance * garrison) const
 {
@@ -241,6 +251,31 @@ void HeroMovementController::onMoveHeroApplied()
 	assert(currentlyMovingHero);
 	const auto * hero = currentlyMovingHero;
 
+	if (isStepModeEnabled())
+	{
+		if (GAME->interface()->showingDialog->isBusy())
+		{
+			endMove(hero);
+			return;
+		}
+
+		if (!GAME->interface()->localState->hasPath(hero))
+		{
+			endMove(hero);
+			return;
+		}
+
+		const auto & path = GAME->interface()->localState->getPath(hero);
+		if (!GAME->interface()->stepMovement().tryConsumeForNextNode(hero, path))
+		{
+			endMove(hero);
+			return;
+		}
+
+		sendMovementRequest(hero, path);
+		return;
+	}
+
 	bool canMove = GAME->interface()->localState->hasPath(hero) && GAME->interface()->localState->getPath(hero).nextNode().turns == 0 && !GAME->interface()->showingDialog->isBusy();
 	bool wantStop = stoppingMovement;
 	bool canStop = !canMove || canHeroStopAtNode(GAME->interface()->localState->getPath(hero).currNode());
@@ -358,7 +393,8 @@ void HeroMovementController::sendMovementRequest(const CGHeroInstance * h, const
 	const auto & currNode = path.currNode();
 	const auto & nextNode = path.nextNode();
 
-	assert(nextNode.turns == 0);
+	if (!isStepModeEnabled())
+		assert(nextNode.turns == 0);
 	assert(currNode.coord == h->visitablePos());
 
 	if(nextNode.isTeleportAction())
@@ -395,7 +431,7 @@ void HeroMovementController::sendMovementRequest(const CGHeroInstance * h, const
 		if(node.isTeleportAction())
 			break; // pause after monolith / subterra gates
 
-		if (node.turns != 0)
+		if (node.turns != 0 && !isStepModeEnabled())
 			break; // ran out of move points
 
 		bool useTransitHere = node.layer == EPathfindingLayer::AIR || node.layer == EPathfindingLayer::WATER;

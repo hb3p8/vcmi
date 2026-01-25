@@ -15,6 +15,7 @@
 #include "../GameInstance.h"
 #include "../HeroMovementController.h"
 #include "../PlayerLocalState.h"
+#include "../step/StepDebugProvider.h"
 #include "../adventureMap/AdventureMapInterface.h"
 #include "../gui/WindowHandler.h"
 #include "../mapView/mapHandler.h"
@@ -41,6 +42,8 @@ void StepMovementController::onStepsUpdated(int64_t totalSteps)
 	{
 		totalStepsValue = totalSteps;
 		stepBudget = 0;
+		if (GAME)
+			GAME->stepDebugProvider().resetConsumption();
 		return;
 	}
 
@@ -73,6 +76,31 @@ void StepMovementController::clearMovement()
 void StepMovementController::tick()
 {
 	tryAdvance();
+}
+
+bool StepMovementController::tryConsumeForNextNode(const CGHeroInstance * hero, const CGPath & path)
+{
+	if (!isStepModeEnabled())
+		return false;
+
+	if (!movementQueued || !queuedHero || hero != queuedHero)
+		return false;
+
+	if (path.endPos() != queuedPathEnd)
+		return false;
+
+	if (path.nodes.size() < 2)
+		return false;
+
+	int64_t stepsRequired = stepsRequiredForNextNode(path);
+	if (stepBudget < stepsRequired)
+		return false;
+
+	stepBudget -= stepsRequired;
+	if (GAME)
+		GAME->stepDebugProvider().consumeSteps(stepsRequired);
+
+	return true;
 }
 
 bool StepMovementController::isStepModeEnabled() const
@@ -128,25 +156,8 @@ int64_t StepMovementController::stepsRequiredForNextNode(const CGPath & path) co
 	if (stepsPerTile <= 0)
 		stepsPerTile = 1;
 
-	int baseCost = 1;
-	if (owner.cb)
-		baseCost = static_cast<int>(owner.cb->getSettings().getInteger(EGameSettings::HEROES_MOVEMENT_COST_BASE));
-	if (baseCost <= 0)
-		baseCost = 1;
-
-	const auto & currNode = path.currNode();
-	const auto & nextNode = path.nextNode();
-
-	int movementCost = baseCost;
-	if (nextNode.turns == currNode.turns && currNode.moveRemains >= nextNode.moveRemains)
-		movementCost = currNode.moveRemains - nextNode.moveRemains;
-
-	if (movementCost <= 0)
-		movementCost = baseCost;
-
-	int64_t scaled = static_cast<int64_t>(stepsPerTile) * static_cast<int64_t>(movementCost);
-	int64_t stepsRequired = (scaled + baseCost - 1) / baseCost;
-	return std::max<int64_t>(stepsRequired, 1);
+	(void)path;
+	return stepsPerTile;
 }
 
 void StepMovementController::tryAdvance()
@@ -179,15 +190,11 @@ void StepMovementController::tryAdvance()
 	if (!canAdvance())
 		return;
 
-	if (path.nextNode().turns != 0)
-		return;
-
-	int64_t stepsRequired = stepsRequiredForNextNode(path);
-	if (stepBudget < stepsRequired)
-		return;
-
 	auto now = std::chrono::steady_clock::now();
 	if (!isMinIntervalSatisfied(now))
+		return;
+
+	if (!tryConsumeForNextNode(queuedHero, path))
 		return;
 
 	CGPath stepPath;
@@ -195,7 +202,6 @@ void StepMovementController::tryAdvance()
 	stepPath.nodes.push_back(path.nodes[path.nodes.size() - 1]);
 
 	movementController.requestMovementStart(queuedHero, stepPath);
-	stepBudget -= stepsRequired;
 	lastMoveTime = now;
 	hasLastMoveTime = true;
 }

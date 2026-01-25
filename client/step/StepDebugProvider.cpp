@@ -20,6 +20,7 @@ void StepDebugProvider::addSteps(int64_t steps)
 void StepDebugProvider::reset()
 {
 	totalStepsValue = 0;
+	consumedStepsValue = 0;
 	notifyListeners();
 }
 
@@ -59,6 +60,29 @@ void StepDebugProvider::setIntervalMs(int intervalMs)
 int64_t StepDebugProvider::totalSteps() const
 {
 	return totalStepsValue;
+}
+
+int64_t StepDebugProvider::consumedSteps() const
+{
+	return consumedStepsValue;
+}
+
+int64_t StepDebugProvider::availableSteps() const
+{
+	return std::max<int64_t>(totalStepsValue - consumedStepsValue, 0);
+}
+
+void StepDebugProvider::consumeSteps(int64_t steps)
+{
+	if (steps <= 0 || totalStepsValue <= 0)
+		return;
+
+	consumedStepsValue = std::min<int64_t>(consumedStepsValue + steps, totalStepsValue);
+}
+
+void StepDebugProvider::resetConsumption()
+{
+	consumedStepsValue = 0;
 }
 
 void StepDebugProvider::addListener(const StepsListener & listener)

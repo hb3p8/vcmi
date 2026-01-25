@@ -31,6 +31,7 @@ public:
 	void queueMovement(const CGHeroInstance * hero, const CGPath & path);
 	void clearMovement();
 	void tick();
+	bool tryConsumeForNextNode(const CGHeroInstance * hero, const CGPath & path);
 
 private:
 	bool isStepModeEnabled() const;

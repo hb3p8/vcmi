@@ -207,7 +207,10 @@ void GameEngine::drawPerformanceOverlay()
 	std::string time = TextOperations::getFormattedTimeLocal(std::time(nullptr));
 	std::string power = powerState.powerState == PowerStateMode::UNKNOWN ? "" : powerSymbol + std::to_string(powerState.percent) + "%";
 	int64_t steps = GAME ? GAME->stepDebugProvider().totalSteps() : 0;
+	int64_t consumedSteps = GAME ? GAME->stepDebugProvider().consumedSteps() : 0;
 	std::string stepText = "Steps: " + std::to_string(steps);
+	if (consumedSteps > 0)
+		stepText += " (spent " + std::to_string(consumedSteps) + ")";
 
 	std::string textToDisplay = time + (power.empty() ? "" : " | " + power) + " | " + stepText + " | " + fps;
 

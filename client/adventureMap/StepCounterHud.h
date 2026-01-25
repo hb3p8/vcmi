@@ -34,6 +34,7 @@ private:
 	std::shared_ptr<CLabel> stepsLabel;
 	std::shared_ptr<CLabel> statusLabel;
 	int64_t lastSteps;
+	int64_t lastConsumed;
 	bool lastTimerEnabled;
 	bool lastPaused;
 };

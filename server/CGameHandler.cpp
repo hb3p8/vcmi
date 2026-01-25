@@ -862,6 +862,8 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 		&& t.isLand()
 		&& (dst == h->pos || (h->getBoat()->layer == EPathfindingLayer::SAIL && !t.blocked()));
 
+	const bool stepMode = gameInfo().getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
+
 	//result structure for start - movement failed, no move points used
 	TryMoveHero tmh;
 	tmh.id = hid;
@@ -925,7 +927,7 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 	if(h->isGarrisoned())
 		return complainRet("Can not move garrisoned hero!");
 
-	if(h->movementPointsRemaining() < cost && dst != h->pos && movementMode == EMovementMode::STANDARD)
+	if(!stepMode && h->movementPointsRemaining() < cost && dst != h->pos && movementMode == EMovementMode::STANDARD)
 		return complainRet("Hero doesn't have any movement points left!");
 
 	if (transit && !canFly && !(canWalkOnSea && t.isWater()) && !CGTeleport::isTeleport(objectToVisit))
@@ -1004,14 +1006,16 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 
 	if (!transit && embarking)
 	{
-		tmh.movePoints = h->movementPointsAfterEmbark(h->movementPointsRemaining(), cost, false, ti);
+		if (!stepMode)
+			tmh.movePoints = h->movementPointsAfterEmbark(h->movementPointsRemaining(), cost, false, ti);
 		return doMove(TryMoveHero::EMBARK, IGNORE_GUARDS, DONT_VISIT_DEST, LEAVING_TILE);
 		// In H3 embark ignore guards
 	}
 
 	if (disembarking)
 	{
-		tmh.movePoints = h->movementPointsAfterEmbark(h->movementPointsRemaining(), cost, true, ti);
+		if (!stepMode)
+			tmh.movePoints = h->movementPointsAfterEmbark(h->movementPointsRemaining(), cost, true, ti);
 		return doMove(TryMoveHero::DISEMBARK, CHECK_FOR_GUARDS, VISIT_DEST, LEAVING_TILE);
 	}
 
@@ -1038,9 +1042,12 @@ bool CGameHandler::moveHero(ObjectInstanceID hid, int3 dst, EMovementMode moveme
 
 	//still here? it is standard movement!
 	{
-		tmh.movePoints = h->movementPointsRemaining() >= cost
-						? h->movementPointsRemaining() - cost
-						: 0;
+		if (!stepMode)
+		{
+			tmh.movePoints = h->movementPointsRemaining() >= cost
+							? h->movementPointsRemaining() - cost
+							: 0;
+		}
 
 		EGuardLook lookForGuards = CHECK_FOR_GUARDS;
 		EVisitDest visitDest = VISIT_DEST;

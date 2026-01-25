@@ -24,6 +24,7 @@
 StepCounterHud::StepCounterHud(const Rect & area)
 	: CIntObject(TIME)
 	, lastSteps(-1)
+	, lastConsumed(-1)
 	, lastTimerEnabled(false)
 	, lastPaused(false)
 {
@@ -80,13 +81,17 @@ void StepCounterHud::updateText(bool force)
 
 	const auto & provider = GAME->stepDebugProvider();
 	int64_t steps = provider.totalSteps();
+	int64_t consumed = provider.consumedSteps();
 	bool timerEnabled = provider.isTimerEnabled();
 	bool paused = !GAME->interface()->makingTurn;
 
-	if (!force && steps == lastSteps && timerEnabled == lastTimerEnabled && paused == lastPaused)
+	if (!force && steps == lastSteps && consumed == lastConsumed && timerEnabled == lastTimerEnabled && paused == lastPaused)
 		return;
 
-	stepsLabel->setText("Steps: " + std::to_string(steps));
+	std::string stepText = "Steps: " + std::to_string(steps);
+	if (consumed > 0)
+		stepText += " (spent " + std::to_string(consumed) + ")";
+	stepsLabel->setText(stepText);
 
 	std::string status = timerEnabled ? "Timer" : "Manual";
 	if (paused)
@@ -94,6 +99,7 @@ void StepCounterHud::updateText(bool force)
 	statusLabel->setText(status);
 
 	lastSteps = steps;
+	lastConsumed = consumed;
 	lastTimerEnabled = timerEnabled;
 	lastPaused = paused;
 }

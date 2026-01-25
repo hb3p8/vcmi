@@ -29,6 +29,10 @@ public:
 	void setStepsPerTick(int steps);
 	void setIntervalMs(int intervalMs);
 	int64_t totalSteps() const;
+	int64_t consumedSteps() const;
+	int64_t availableSteps() const;
+	void consumeSteps(int64_t steps);
+	void resetConsumption();
 
 	void addListener(const StepsListener & listener);
 	void update();
@@ -40,6 +44,7 @@ private:
 
 	std::vector<StepsListener> listeners;
 	int64_t totalStepsValue = 0;
+	int64_t consumedStepsValue = 0;
 	int stepsPerTick = 25;
 	int intervalMsValue = 1000;
 	bool timerEnabled = false;

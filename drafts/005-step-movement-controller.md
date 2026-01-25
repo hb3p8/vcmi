@@ -16,6 +16,7 @@ We already have step input (debug provider) and UI feedback. The next MVP milest
   - Advances hero one tile per budget consumption, throttled by a minimum interval.
 - Hook the controller into the adventure map flow (path selection, movement confirmation, cancelation).
 - Configurable settings: steps-per-tile and min tile interval.
+- Remove per-turn movement point limits while Step mode is enabled.
 
 ## Non-Goals
 - No new server-side pathing logic.
@@ -60,6 +61,14 @@ We already have step input (debug provider) and UI feedback. The next MVP milest
      - `settings["adventure"]["minTileIntervalMs"]` (number)
    - Optional: `settings["adventure"]["stepMovementPaused"]` boolean.
 
+6. Remove turn-based movement limits in Step mode.
+   - Allow step advancement across turn boundaries by dropping the `path.nextNode().turns != 0` gate in `StepMovementController`.
+   - Relax `HeroMovementController::sendMovementRequest` so `nextNode.turns` can be non-zero when Step mode is enabled (remove or gate the assert).
+   - On the server, bypass movement-point depletion and the "not enough movement points" guard in `CGameHandler::moveHero` when `stepModeEnabled` is true.
+     - Keep `tmh.movePoints` unchanged so movement points no longer tick down per step.
+   - Update path rendering to treat all path nodes as reachable in Step mode (`client/mapView/MapRenderer.cpp` currently greys nodes with `turns > 0`).
+   - If needed for UI consistency, treat `movementPointsRemaining()` as non-blocking in hero selection and shortcuts.
+
 ## Sample Snippet
 ```cpp
 if (canAdvance && stepBudget >= stepsRequired && msSinceLastMove >= minTileIntervalMs)
@@ -74,10 +83,12 @@ if (canAdvance && stepBudget >= stepsRequired && msSinceLastMove >= minTileInter
 - Queue a hero path, then add steps via debug hotkey.
 - Verify one tile advances per threshold and respects the min interval.
 - Open a dialog/battle; confirm movement pauses and resumes afterward.
+- Queue a path longer than a normal turn limit and confirm tiles continue advancing.
 
 ## Risks and Notes
 - Ensure movement requests do not overlap with existing animation state.
 - Terrain costs might be encoded differently across path nodes; verify with real map data.
+- Removing movement-point limits ties into the later "endless turn" work; confirm no other turn-gated systems regress.
 
 ## Deviations During Implementation
 - Wired path queuing through `CPlayerInterface::moveHero` instead of AdventureMap/PlayerLocalState hooks.
