@@ -49,6 +49,7 @@ class MotionInterested;
 class PlayerLocalState;
 class TimeInterested;
 class HeroMovementController;
+class StepMovementController;
 
 namespace boost
 {
@@ -65,6 +66,7 @@ class CPlayerInterface : public CGameInterface
 	std::list<std::shared_ptr<CInfoWindow>> dialogs; //queue of dialogs awaiting to be shown (not currently shown!)
 
 	std::unique_ptr<HeroMovementController> movementController;
+	std::unique_ptr<StepMovementController> stepMovementController;
 	std::unique_ptr<PathfinderCache> pathfinderCache;
 public: // TODO: make private
 	std::unique_ptr<ArtifactsUIController> artifactController;
@@ -194,6 +196,8 @@ public: // public interface for use by client via GAME->interface() access
 	void showYesNoDialog(const std::string &text, CFunctionList<void()> onYes, CFunctionList<void()> onNo, const std::vector<std::shared_ptr<CComponent>> & components = std::vector<std::shared_ptr<CComponent>>());
 
 	void moveHero(const CGHeroInstance *h, const CGPath& path);
+	StepMovementController & stepMovement();
+	bool canStepMovement() const;
 
 	void tryDigging(const CGHeroInstance *h);
 	void showShipyardDialogOrProblemPopup(const IShipyard *obj); //obj may be town or shipyard;

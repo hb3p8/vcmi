@@ -15,6 +15,7 @@
 #include "Client.h"
 #include "CServerHandler.h"
 #include "HeroMovementController.h"
+#include "step/StepMovementController.h"
 #include "PlayerLocalState.h"
 
 #include "adventureMap/AdventureMapInterface.h"
@@ -34,6 +35,7 @@
 #include "GameInstance.h"
 #include "gui/CursorHandler.h"
 #include "gui/WindowHandler.h"
+#include "step/StepDebugProvider.h"
 
 #include "mainmenu/CMainMenu.h"
 #include "mainmenu/CHighScoreScreen.h"
@@ -72,6 +74,7 @@
 #include "../lib/texts/CGeneralTextHandler.h"
 #include "../lib/CPlayerState.h"
 #include "../lib/CRandomGenerator.h"
+#include "../lib/IGameSettings.h"
 #include "../lib/CStack.h"
 #include "../lib/CStopWatch.h"
 #include "../lib/CThreadHelper.h"
@@ -127,6 +130,7 @@ std::shared_ptr<BattleInterface> CPlayerInterface::battleInt;
 CPlayerInterface::CPlayerInterface(PlayerColor Player):
 	localState(std::make_unique<PlayerLocalState>(*this)),
 	movementController(std::make_unique<HeroMovementController>()),
+	stepMovementController(std::make_unique<StepMovementController>(*this, *movementController)),
 	artifactController(std::make_unique<ArtifactsUIController>())
 	
 {
@@ -1260,7 +1264,24 @@ void CPlayerInterface::moveHero( const CGHeroInstance *h, const CGPath& path )
 	if (localState->isHeroSleeping(h))
 		localState->setHeroAwaken(h);
 
+	if (canStepMovement())
+	{
+		stepMovementController->queueMovement(h, path);
+		return;
+	}
+
 	movementController->requestMovementStart(h, path);
+}
+
+StepMovementController & CPlayerInterface::stepMovement()
+{
+	assert(stepMovementController);
+	return *stepMovementController;
+}
+
+bool CPlayerInterface::canStepMovement() const
+{
+	return stepMovementController && cb && cb->getSettings().getBoolean(EGameSettings::STEP_MODE_ENABLED);
 }
 
 void CPlayerInterface::showGarrisonDialog( const CArmedInstance *up, const CGHeroInstance *down, bool removableUnits, QueryID queryID)
@@ -1507,6 +1528,12 @@ void CPlayerInterface::update()
 		showingDialog->setBusy();
 		ENGINE->windows().pushWindow(dialogs.front());
 		dialogs.pop_front();
+	}
+
+	if (stepMovementController)
+	{
+		stepMovementController->onStepsUpdated(GAME->stepDebugProvider().totalSteps());
+		stepMovementController->tick();
 	}
 }
 
