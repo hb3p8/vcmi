@@ -12,11 +12,14 @@
 
 #include "DebugStepInputProvider.h"
 #include "StepInputProvider.h"
+#ifdef VCMI_IOS
+#include "IosStepInputProvider.h"
+#endif
 
 std::unique_ptr<StepInputProvider> createStepInputProvider(QObject * parent)
 {
 #ifdef VCMI_IOS
-	return nullptr;
+	return std::make_unique<IosStepInputProvider>(parent);
 #else
 	return std::make_unique<DebugStepInputProvider>(parent);
 #endif

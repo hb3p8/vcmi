@@ -21,6 +21,15 @@ set(vcmiqt_HEADERS
 		vcmiqt.h
 )
 
+if(IOS)
+	list(APPEND vcmiqt_SRCS
+		IosStepInputProvider.cpp
+	)
+	list(APPEND vcmiqt_HEADERS
+		IosStepInputProvider.h
+	)
+endif()
+
 assign_source_group(${vcmiqt_SRCS} ${vcmiqt_HEADERS})
 
 set(CMAKE_AUTOMOC ON)
@@ -45,6 +54,10 @@ if(WIN32)
 endif()
 
 target_link_libraries(vcmiqt vcmi Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets)
+
+if(IOS)
+	target_link_libraries(vcmiqt iOS_utils)
+endif()
 
 target_include_directories(vcmiqt PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
